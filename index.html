@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>SAP Dashboard</title>
+
+    <meta name="Vaden Masrani" content="D3Dashboard">
+	
+	<!-- D3,jQuery,Underscore  -->
+   	<script type="text/javascript" src="node_modules/d3/d3.min.js"></script>
+    <script type="text/javascript" src="node_modules/jquery/dist/jquery.min.js"></script>
+   	<script type="text/javascript" src="node_modules/underscore/underscore-min.js"></script>
+   	
+	<!-- Bootstrap  -->
+
+	<script src="node_modules/bootstrap/js/bootstrap.min.js"></script>
+	<link href="node_modules/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+
+   	<!-- tinycolor  -->
+   	<script type="text/javascript" src="node_modules/tinycolor/tinycolor.js"></script>
+
+	<!-- Slider  -->
+    <script type="text/javascript" src="node_modules/bootstrap-slider/js/bootstrap-slider.js"></script>
+	<link href="node_modules/bootstrap-slider/css/bootstrap-slider.css" rel="stylesheet">
+
+    <!-- Chosen  -->
+    <script src="node_modules/chosen/chosen.jquery.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="node_modules/chosen/chosen.min.css">
+ 	
+ 	<!-- Multiselect  -->
+    <script src="node_modules/bootstrap-multiselect/dist/js/bootstrap-multiselect.js"></script>
+    <link rel="stylesheet" type="text/css" href="node_modules/bootstrap-multiselect/dist/css/bootstrap-multiselect.css">
+
+    <!-- Sortable  -->
+    <script src="node_modules/react-rubaxa-sortable/node_modules/sortablejs/Sortable.min.js"></script>
+   	
+   	<!-- Table with Select/Buttons extension-->
+   	<script src="https://cdn.datatables.net/1.10.10/js/jquery.dataTables.min.js"></script>
+	<script src="https://cdn.datatables.net/1.10.10/js/dataTables.bootstrap.min.js"></script>
+	<link href="https://cdn.datatables.net/1.10.10/css/dataTables.bootstrap.min.css" rel="stylesheet">
+	<script src="https://cdn.datatables.net/select/1.1.0/js/dataTables.select.min.js"></script>
+	<link href="https://cdn.datatables.net/select/1.1.0/css/select.dataTables.min.css" rel="stylesheet">
+	<script src="https://cdn.datatables.net/buttons/1.1.0/js/dataTables.buttons.min.js"></script>
+
+
+  
+	<link href="css/style.css" rel="stylesheet" type="text/css">
+  </head>
+  <body>
+    <div class="container-fluid">
+	<div class="row">
+		<div class="col-md-12" id="header">
+			<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+				<form class="navbar-form navbar-right" role="search">
+					<label style="color:white; font-weight:normal">Search</label>
+	                <select class="chosen chzn-done item_search" name="FUNC_select" id="item_select">
+	                <option selected='show_all'>Show All</option>
+	                </select>
+	                <!-- Single button -->
+					<div class="btn-group">
+					  <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+					    Export <span class="caret"></span>
+					  </button>
+					  <ul class="dropdown-menu">
+					    <li><a href="#" id="csvExport">CSV</a></li>
+					    <li><a href="#">Excel</a></li>
+					    <li><a href="#">JSON</a></li>
+					  </ul>
+					</div>
+				</form>
+			</div>
+			<div class="row" id="focus">
+				<div class="col-md-3" id="filterbar">
+					<div class="input-small"> 
+						<label class="control-label text-left input-medium">Performance</label>
+							<input id="performanceSlider" type="text" class="span2" value="" data-slider-min="0" data-slider-max="1" data-slider-step="0.01" data-slider-value="[0,1]"/> 
+					</div>
+					<div class="input-small">
+						<label class="control-label text-left input-medium">Usage</label>
+						<input id="usageSlider" type="text" class="span2" value="" data-slider-min="0" data-slider-max="1" data-slider-step="0.01" data-slider-value="[0,1]"/>
+					</div>
+					<div class="top-buffer" id="sortDiv">
+						<label class="control-label text-left input-mini" >Sort</label>
+					     <select class="form-control input-medium top-buffer" style="margin-top: 15px;" id="sortSelect">
+							 <option value="name">Name</option>
+						     <option value="degree">Degree</option>
+						     <option value="performance">Performance</option>
+						     <option value="usage">Usage</option>
+						     <option value="startdate">Start Date</option>
+						     <option value="loc">Lines of Code</option>
+						 </select>
+					</div>
+					<div class="top-buffer" id="valueDiv">
+				    	<label class="control-label text-left input-mini">Value</label>
+					     <select class="form-control input-medium top-buffer" style="margin-top: 15px;" id="valueSelect">
+							 <option value="none">None</option>
+						     <option value="performance">Performance</option>
+						     <option value="loc">Loc</option>
+						     <option value="dbrows">DBrows</option>
+						     <option value="usage">Usage</option>
+						     <option value="p_viol_d">P_Viol_D</option>
+						 </select>
+					</div>
+					<div class="top-buffer" id="orderDiv">
+				    	<label class="control-label text-left input-mini">Group</label>
+					     <select class="form-control input-medium top-buffer" style="margin-top: 15px;" id="orderSelect" multiple="multiple">
+
+						 </select>
+					</div>
+				<div class="checkbox">
+				  <label class="input-medium">
+				    <input type="checkbox" value="" id="links_checkbox">
+				    Hide lines
+				  </label>
+				</div>
+				</div>
+				<div class="col-md-9">
+					<table id="myTable" class="row-border stripe compact hover" cellspacing="0" width="100%">
+						<thead>
+				            <tr>
+				            	<th></th>
+				                <th class="right">ID</th> 
+				                <th class="right">Group</th>
+				                <th class="right">Performance</th>
+				                <th class="right">Usage</th>
+				                <th class="right">Degree</th>
+				                <th class="right">Lines of Code</th>
+				                <th class="right">Database Rows</th>
+				                <th class="right">Violation Density</th>
+				                <th class="right">Creation date</th> 
+				            </tr>
+				        </thead>
+					</table>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="row top-buffer chart">
+		<div id="arc_diagram"></div>
+	</div>
+</div>
+<script type="text/javascript" src="js/DataHandler.js"></script>
+<script type="text/javascript" src="js/arc_diagram.js"></script>
+<script>
+$(document).ready(function(){
+	d3.json("data/ps_data.json", function(json){
+	  	dataHandler = DataHandler(json); // Global
+
+	    sapdash.init(dataHandler.nodes,{groups:dataHandler.groups,
+	    	clickHandler:function(d){
+				var focalset = sapdash.get_focal_set();
+				table.clear();
+				table.search(""); //Clear filter
+				if( focalset){
+					console.log("notnull");
+					table.rows.add(focalset);			
+				}
+				else{
+					console.log("null");
+					table.rows.add(d3.values(sapdash.visibleNodes()));
+				}
+					table.draw();	
+
+	    }},
+	    "#arc_diagram");
+
+	    table = $('#myTable').DataTable({
+		    data: d3.values(dataHandler.nodes),
+		    "scrollY":        "250px",
+	        "scrollCollapse": true,
+	        "sScrollX": "100%",
+    		"bScrollCollapse": true,
+	        "paging":         false,
+	        "info":     false,
+	        'sDom': 't',
+	        select: true,
+		    columns: [
+		     {
+                "className":      'details-control',
+                "orderable":      false,
+                "data":           null,
+                "defaultContent": '<span class="glyphicon glyphicon-chevron-down"></span>'
+            },
+	        { data: "id", },
+	        { data: "group" },
+	        { data: "performance" },
+	        { data: "usage" },
+	        { data: "degree" },
+	        { data: "loc" },
+	        { data: "dbrows" },
+	        { data: "p_viol_d" },
+	        { data: "creation_date" },
+	        { data: "parent_ids", "visible": false },  //To allow search to use these fieldss
+	        { data: "children_ids", "visible": false },//To allow search to use these fieldss
+	    ]
+		});
+			
+	    $("#csvExport").click(function() {
+	      console.log("clicked");
+	      var csv = table.buttons.exportData();
+	      window.location.href = 'data:text/csv;charset=UTF-8,'+ encodeURIComponent(csv.body);
+	    });
+
+
+		 // $('#myTable tbody').on( 'click', 'tr', function () {
+		 // 	sapdash.selectNode(table.row(this).data().id);
+	  //   });
+
+		table.on("select",function ( e, dt, type, indexes ) {
+			sapdash.selectNode(dt.data().id);
+		});
+
+		table.on("dblclick",function ( e, dt, type, indexes ) {
+			table.clear();
+			table.search(""); //Clear filter
+			table.rows.add(d3.values(dataHandler.nodes));
+			table.draw();
+		});
+
+
+    	 // Add event listener for opening and closing details
+	    $('#myTable tbody').on('click', 'td.details-control', function (event) {
+	    	event.stopPropagation(); // Prevent select clickhandler from being called
+	        var tr = $(this).closest('tr');
+	        var row = table.row( tr );
+	        if ( row.child.isShown() ) {
+	            // This row is already open - close it
+	            row.child.hide();
+	            tr.find("span").attr('class',"glyphicon glyphicon-chevron-down");
+	        }
+	        else {
+	            // Open this row
+	            row.child( format(row.data()) ).show();
+	            tr.find("span").attr('class',"glyphicon glyphicon-chevron-up");
+	        }
+	    } );
+
+	    /* Formatting function for row details - modify as you need */
+			function format ( d ) {
+				var parents = "";
+				var children = "";
+				if(d.parent_ids.length !== 0){
+					d.parent_ids.forEach(function(elem) {
+						parents += "<li>"  + elem + "</li>";
+					});
+				} 
+				else{
+					parents = "None";	
+					
+				}
+				if(d.children_ids.length !== 0){
+					d.children_ids.forEach(function(elem) {
+						children += "<li>"  + elem + "</li>";
+					});
+				} 
+				else{
+					children = "None";	
+					
+				}
+			    return '<table cellpadding="5" cellspacing="0" border="0" style="padding-left:50px;">'+
+			        '<tr>'+
+			            '<td>Parents:</td>'+
+			            '<td>'+parents+'</td>'+
+			        '</tr>'+
+			        '<tr>'+
+			            '<td>Children:</td>'+
+			            '<td>'+children+'</td>'+
+			        '</tr>'+
+			    '</table>';
+			}
+
+	 	//Fill searchbar 
+		var groups =  dataHandler.groups;
+
+	    groups.forEach(function(d){
+		      var optgroup = $('<optgroup>');
+		      optgroup.attr('label',d);
+		      var nodes = dataHandler.getByGroup(d);
+		      Object.keys(nodes).forEach(function(id){
+		        var option = $("<option></option>");
+		        option.attr("value",id).text(nodes[id].label);
+		        optgroup.append(option);
+		      });
+		      // Update itemsearch
+		      $(".item_search").append(optgroup);
+			  
+			  // Update groupSelect
+		      $("#orderSelect").append("<option selected='selected'>"+d+"</option>");
+		   });
+
+		   $(".item_search").chosen({
+		    width:"300px",
+		    search_contains: true
+		  }).on("change", function(event, data){ 
+		  	  if(this.value ==="Show All"){
+				table.search("").draw();
+				sapdash.selectNode("");		  	  	
+		  	  }
+		  	  else{
+			  	  table.search( this.value ).draw();
+			  	  table.$('tr.selected').removeClass('selected');
+				  $("tr:contains("+this.value+")").first().addClass('selected');
+		  	  }
+
+		      sapdash.selectNode(data.selected);
+		  });
+
+	  // Make orderSelect sortable by dragging
+
+	  $('#orderSelect').multiselect({
+            onDropdownHide: function(event) {
+                filter(true);
+            }
+        });
+
+	  $("#orderDiv .multiselect-container").attr("id","my-ui-list");
+	  var list = document.getElementById("my-ui-list");
+	  Sortable.create(list, {
+		 onUpdate: function (evt){
+		 		filter(true);
+			 // 	var groups = [];
+				// $("#orderDiv input:checked").each(function(){groups.push($(this).val());});
+		 	// 	sapdash.reorder(groups);
+			}
+		}); 
+
+
+	  $('#valueSelect').multiselect().change(function() {
+	    sapdash.set_value($(this).val());
+		});
+
+	  $('#sortSelect').multiselect().change(function() {
+	    sapdash.sort_by($(this).val());
+	 	});
+	
+	  $("#performanceSlider, #usageSlider").slider({});
+
+	  $(".slider-handle").on("mouseup",function() {
+	    	filter(true);
+		});
+
+	   d3.select("#links_checkbox").on("change", function() {
+	      if(this.checked){
+	        sapdash.show_links(false);
+	    }
+	      else{
+	        sapdash.show_links(true);
+	    }
+	  });
+	
+	 	// Show after everything is loaded 
+		$(".container-fluid").css("visibility", "visible");
+
+		function filter(update_table){
+			var performance = $("#performanceSlider").slider('getValue');
+	    	var usage = $("#usageSlider").slider('getValue');
+	    	// Get checked groups in order 
+	    	var groups = [];
+			$("#orderDiv input:checked").each(function(){groups.push($(this).val());});
+			var n = dataHandler.filterBy(performance,usage,groups);
+			
+			if(update_table){
+				table.clear();
+				table.search(""); //Clear filter
+				table.rows.add(d3.values(n));
+				table.draw();
+			}
+	    	sapdash.update_nodes(n,groups,$("#sortSelect").val());
+	    	updateSearchBar();
+		}
+
+		function updateSearchBar(){
+			var validNodes = sapdash.visibleNodes();
+			$(".item_search option").each(function(){
+				if($(this).val() === "Show All") return;
+	 			if($(this).val() in validNodes){
+					$(this).attr('disabled',false);
+				}
+				else{
+					$(this).attr('disabled',"disabled");
+				}
+			});
+			$(".item_search").trigger("chosen:updated");
+		} 	
+
+	 });
+
+});
+
+   </script>
+
+  </body>
+</html>
